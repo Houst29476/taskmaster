@@ -4,10 +4,12 @@ var tasks = {};
 var createTask = function(taskText, taskDate, taskList) {
   // create elements that make up a task item
   var taskLi = $("<li>").addClass("list-group-item");
-
-  var taskSpan = $("<span>").addClass("badge badge-primary badge-pill").text(taskDate);
-
-  var taskP = $("<p>").addClass("m-1").text(taskText);
+  var taskSpan = $("<span>")
+    .addClass("badge badge-primary badge-pill")
+    .text(taskDate);
+  var taskP = $("<p>")
+    .addClass("m-1")
+    .text(taskText);
 
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
@@ -79,16 +81,18 @@ $(".card .list-group").sortable({
   tolerance: "pointer",
   helper: "clone",
   activate: function(event, ui) {
-    console.log(ui);
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
   },
   deactivate: function(event, ui) {
-    console.log(ui);
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
   },
   over: function(event) {
-    console.log(event);
+    $(event.target).addClass("dropover-active");
   },
   out: function(event) {
-    console.log(event);
+    $(event.target).removeClass("dropover-active");
   },
   update: function() {
     var tempArr = [];
@@ -119,9 +123,6 @@ $(".card .list-group").sortable({
     tasks[arrName] = tempArr;
     saveTasks();
   },
-  stop: function(event) {
-    $(this).removeClass("dropover");
-  }
 });
 
 // trash icon can be dropped onto
@@ -131,12 +132,14 @@ $("#trash").droppable({
   drop: function(event, ui) {
     // remove dragged element from the dom
     ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-active");
   },
   over: function(event, ui) {
     console.log(ui);
+    $(".bottom-trash").addClass("bottom-trash-active");
   },
   out: function(event, ui) {
-    console.log(ui);
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
 });
 // ------------- DRAGGABLE FUNCTIONALITY END ------------------ //
@@ -161,7 +164,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -201,7 +204,7 @@ $(".list-group").on("click", "p", function() {
 // ----------------- TASK TEXT IN BOXES CLICKED END -------------------- //
 
 // ---------------------- EDITING A TASK ----------------------- //
-$(".list-group").on("change", "input[type='text']", function() {
+$(".list-group").on("blur", "textarea", function() {
   // get current value of textarea
   var text = $(this).val();
 
@@ -296,3 +299,8 @@ $("#remove-tasks").on("click", function() {
 // load tasks for the first time
 loadTasks();
 
+setInterval(function() {
+  $(".card .list-group-item").each(function() {
+    auditTask($(this));
+  });
+}, 1800000);
